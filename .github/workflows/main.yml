@@ -31,47 +31,25 @@ jobs:
       - name: Authenticate with Power Platform (Source Environment)
         run: |
           pac auth create \
-            --url https://org7b407228.crm8.dynamics.com \
+            --environmentId 10615798-70d6-efb4-a25a-7c36b627d7d7 \
             --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
-      # Download automations.zip from the repository
-      - name: Download automations.zip
-        run: curl -L -o automations.zip https://github.com/ArchanaP-Pp/NewRepositoryPP/raw/main/automations.zip
-
-      # Handle file with "(1)" suffix
-      - name: Handle file with "(1)" suffix
-        shell: bash
+      # Export solution from source environment
+      - name: Export solution from source environment
         run: |
-          if [ -f "./automations.zip (1)" ]; then
-            echo "Renaming file to automations.zip"
-            mv "./automations.zip (1)" automations.zip
-          else
-            echo "File name is correct."
-          fi
+          pac solution export \
+            --environment 10615798-70d6-efb4-a25a-7c36b627d7d7 \
+            --path automations.zip \
+            --managed true
 
-      # Configure Git user details
-      - name: Configure Git user
+      # Upload exported solution to repository
+      - name: Upload solution to repository
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-      # Check if the file exists and commit it
-      - name: Commit and push solution
-        shell: bash
-        run: |
-          if [ -f "./automations.zip" ]; then
-            git add automations.zip
-            if git commit -m "Exported solution"; then
-              git push
-            else
-              echo "Nothing to commit, working tree is clean."
-            fi
-          else
-            echo "File not found: ./automations.zip"
-            exit 1
-          fi
+          git add automations.zip
+          git commit -m "Exported solution from source environment"
+          git push
 
   deploy:
     runs-on: ubuntu-latest
@@ -96,17 +74,17 @@ jobs:
       - name: Authenticate with Power Platform (Target Environment)
         run: |
           pac auth create \
-            --url https://orgd05c6c63.crm8.dynamics.com \
+            --environmentId 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
             --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
-      # Import Solution into Target Environment
-      - name: Import Solution into Target Environment
+      # Import solution into target environment
+      - name: Import solution into target environment
         run: |
           pac solution import \
             --path automations.zip \
-            --environment https://orgd05c6c63.crm8.dynamics.com \
+            --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
             --overwrite-unmanaged-customizations true
 
       # Notify success
