@@ -21,29 +21,32 @@ jobs:
       - name: Set up Node.js 14
         uses: actions/setup-node@v3
         with:
-          node-version: '14'  # Ensure Node.js 14.x is used
+          node-version: '14'
 
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
-        run: |
-          npm install -g pac-cli  # Install pac-cli for interacting with Power Platform
+        run: npm install -g pac-cli
 
       # Authenticate with Power Platform (Source Environment)
       - name: Authenticate with Power Platform (Source Environment)
         run: |
-          pac auth create --url https://org7b407228.crm8.dynamics.com --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 --clientSecret FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl
+          pac auth create \
+            --url https://org7b407228.crm8.dynamics.com \
+            --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
+            --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
+            --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
       # Download automations.zip from the repository
       - name: Download automations.zip
-        run: |
-          curl -L -o ./automations.zip https://github.com/ArchanaP-Pp/NewRepositoryPP/raw/main/automations.zip
+        run: curl -L -o automations.zip https://github.com/ArchanaP-Pp/NewRepositoryPP/raw/main/automations.zip
 
-      # Check if the file has a "(1)" suffix and handle it
+      # Handle file with "(1)" suffix
       - name: Handle file with "(1)" suffix
+        shell: bash
         run: |
           if [ -f "./automations.zip (1)" ]; then
             echo "Renaming file to automations.zip"
-            mv "./automations.zip (1)" ./automations.zip
+            mv "./automations.zip (1)" automations.zip
           else
             echo "File name is correct."
           fi
@@ -56,9 +59,10 @@ jobs:
 
       # Check if the file exists and commit it
       - name: Commit and push solution
+        shell: bash
         run: |
           if [ -f "./automations.zip" ]; then
-            git add ./automations.zip
+            git add automations.zip
             git commit -m "Exported solution"
             git push
           else
@@ -68,7 +72,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # This job depends on the build job
+    needs: build
 
     steps:
       # Checkout the repository
@@ -79,24 +83,29 @@ jobs:
       - name: Set up Node.js 14
         uses: actions/setup-node@v3
         with:
-          node-version: '14'  # Ensure Node.js 14.x is used
+          node-version: '14'
 
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
-        run: |
-          npm install -g pac-cli  # Install pac-cli for interacting with Power Platform
+        run: npm install -g pac-cli
 
       # Authenticate with Power Platform (Target Environment)
       - name: Authenticate with Power Platform (Target Environment)
         run: |
-          pac auth create --url https://orgd05c6c63.crm8.dynamics.com --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 --clientSecret FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl
+          pac auth create \
+            --url https://orgd05c6c63.crm8.dynamics.com \
+            --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
+            --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
+            --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
       # Import Solution into Target Environment
       - name: Import Solution into Target Environment
         run: |
-          pac solution import --path ./automations.zip --environment https://orgd05c6c63.crm8.dynamics.com --overwrite-unmanaged-customizations true
+          pac solution import \
+            --path automations.zip \
+            --environment https://orgd05c6c63.crm8.dynamics.com \
+            --overwrite-unmanaged-customizations true
 
       # Notify success
       - name: Notify success
-        run: |
-          echo "Solution has been successfully deployed to the target environment."
+        run: echo "Solution has been successfully deployed to the target environment."
