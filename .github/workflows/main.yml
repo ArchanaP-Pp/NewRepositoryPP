@@ -63,8 +63,11 @@ jobs:
         run: |
           if [ -f "./automations.zip" ]; then
             git add automations.zip
-            git commit -m "Exported solution"
-            git push
+            if git commit -m "Exported solution"; then
+              git push
+            else
+              echo "Nothing to commit, working tree is clean."
+            fi
           else
             echo "File not found: ./automations.zip"
             exit 1
