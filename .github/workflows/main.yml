@@ -1,4 +1,4 @@
-name: Power Platform CI/CD
+name: Power Platform CI/CD1
 
 on:
   push:
@@ -15,8 +15,7 @@ jobs:
 
     - name: Set up Power Platform CLI
       run: |
-        curl -sSL https://aka.ms/Install-CLI | bash
-        pac install
+        curl -sSL https://aka.ms/install-powerplatform-cli | bash
 
     - name: Authenticate to Source Environment
       run: |
