@@ -1,4 +1,4 @@
-name: Power Platform CI/CD1
+name: Power Platform CI/CD
 
 on:
   push:
