@@ -44,17 +44,30 @@ jobs:
             --path automations.zip \
             --managed true
 
+      # Check if the automations.zip file exists and is not empty
+      - name: Check if automations.zip exists
+        run: |
+          if [ ! -f "./automations.zip" ]; then
+            echo "File automations.zip not found!"
+            exit 1
+          fi
+          if [ ! -s "./automations.zip" ]; then
+            echo "File automations.zip is empty!"
+            exit 1
+          fi
+
       # Configure Git user details before committing
       - name: Configure Git user
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      # Upload exported solution to repository
+      # Add and commit the automations.zip file if it exists
       - name: Upload solution to repository
         run: |
           git add automations.zip
-          git commit -m "Exported solution from source environment"
+          git status
+          git commit -m "Exported solution from source environment" || echo "No changes to commit"
           git push
 
   deploy:
