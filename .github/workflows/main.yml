@@ -1,0 +1,45 @@
+name: Power Platform CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  export_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Power Platform CLI
+      run: |
+        curl -sSL https://aka.ms/Install-CLI | bash
+        pac install
+
+    - name: Authenticate to Source Environment
+      run: |
+        pac auth create --environment https://org7b407228.crm8.dynamics.com --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 --clientSecret FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl
+
+    - name: Export the Solution from Source Environment
+      run: |
+        pac solution export --path ./solution.zip --name "automations" --environment https://org7b407228.crm8.dynamics.com
+
+    - name: Unpack the Solution
+      run: |
+        pac solution unpack --zipfile ./solution.zip --folder ./solutions/automations --allowDelete true
+
+    - name: Authenticate to Target Environment
+      run: |
+        pac auth create --environment https://orgd05c6c63.crm8.dynamics.com --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 --clientSecret FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl
+
+    - name: Import the Solution into Target Environment
+      run: |
+        pac solution import --path ./solutions/automations --environment https://orgd05c6c63.crm8.dynamics.com --async false --overwriteUnmanagedCustomizations true
+
+    - name: Push changes to GitHub
+      run: |
+        git add .
+        git commit -m "Updated solution files"
+        git push origin main
