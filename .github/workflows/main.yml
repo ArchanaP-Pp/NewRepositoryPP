@@ -44,7 +44,7 @@ jobs:
             --path automations.zip \
             --managed true
 
-      # Check if the automations.zip file exists and is not empty
+      # Check if the automations.zip file exists
       - name: Check if automations.zip exists
         run: |
           if [ ! -f "./automations.zip" ]; then
@@ -61,6 +61,11 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+
+      # Set up GitHub authentication with token
+      - name: Set up GitHub token for push
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ArchanaP-Pp/NewRepositoryPP.git
 
       # Add and commit the automations.zip file if it exists
       - name: Upload solution to repository
