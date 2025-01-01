@@ -33,10 +33,10 @@ jobs:
         run: |
           pac auth create --url https://org7b407228.crm8.dynamics.com --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 --clientSecret FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl
 
-      # Export Solution from Source Environment
-      - name: Export Solution from Source Environment
+      # Download automations.zip from the repository
+      - name: Download automations.zip
         run: |
-          pac solution export --name automations --path ./automations.zip --managed true --environment https://org7b407228.crm8.dynamics.com
+          curl -L -o ./automations.zip https://github.com/ArchanaP-Pp/NewRepositoryPP/raw/main/automations.zip
 
       # Check if the file has a "(1)" suffix and handle it
       - name: Handle file with "(1)" suffix
