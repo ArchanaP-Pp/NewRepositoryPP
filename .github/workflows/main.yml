@@ -37,7 +37,7 @@ jobs:
             --url https://make.powerautomate.com/environments/10615798-70d6-efb4-a25a-7c36b627d7d7 \
             --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
-            --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
+            --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
 
       # Export solution from source environment
       - name: Export solution from source environment
@@ -101,7 +101,7 @@ jobs:
             --url https://make.powerautomate.com/environments/8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
             --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
-            --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
+            --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
 
       # Retry solution import with logging
       - name: Retry Import Solution
