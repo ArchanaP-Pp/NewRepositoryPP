@@ -64,53 +64,12 @@ jobs:
 
       # Set up GitHub token for push
       - name: Set up GitHub token for push
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/ArchanaP-Pp/NewRepositoryPP.git
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/ArchanaP-Pp/NewRepositoryPP.git
 
       # Add and commit the automations.zip file if it exists
       - name: Upload solution to repository
         run: |
-          git add automations.zip
-          git status
-          git commit -m "Exported solution from source environment" || echo "No changes to commit"
-          git push
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      # Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Set up Node.js
-      - name: Set up Node.js 14
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-
-      # Install Power Platform CLI (pac)
-      - name: Install Power Platform CLI (pac)
-        run: npm install -g pac-cli
-
-      # Authenticate with Power Platform (Target Environment)
-      - name: Authenticate with Power Platform (Target Environment)
-        run: |
-          pac auth create \
-            --environmentId 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
-            --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
-            --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
-            --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
-
-      # Import solution into target environment
-      - name: Import solution into target environment
-        run: |
-          pac solution import \
-            --path automations.zip \
-            --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
-            --overwrite-unmanaged-customizations true
-
-      # Notify success
-      - name: Notify success
-        run: echo "Solution has been successfully deployed to the target environment."
+          git add 
