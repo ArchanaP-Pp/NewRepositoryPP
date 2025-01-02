@@ -41,18 +41,18 @@ jobs:
         run: |
           pac solution export \
             --environment 10615798-70d6-efb4-a25a-7c36b627d7d7 \
-            --path automations.zip \
+            --path automations_1_0_0_4.zip \
             --managed true
 
       # Validate exported solution
       - name: Validate exported solution
         run: |
-          if [ ! -f "./automations.zip" ]; then
-            echo "Error: automations.zip not found!"
+          if [ ! -f "./automations_1_0_0_4.zip" ]; then
+            echo "Error: automations_1_0_0_4.zip not found!"
             exit 1
           fi
-          if [ ! -s "./automations.zip" ]; then
-            echo "Error: automations.zip is empty!"
+          if [ ! -s "./automations_1_0_0_4.zip" ]; then
+            echo "Error: automations_1_0_0_4.zip is empty!"
             exit 1
           fi
 
@@ -65,7 +65,7 @@ jobs:
       # Commit and push solution
       - name: Commit and push solution
         run: |
-          git add automations.zip
+          git add automations_1_0_0_4.zip
           git commit -m "Exported solution from source environment" || echo "Nothing to commit."
           git push || echo "Push failed. Check permissions or authentication."
 
@@ -100,15 +100,15 @@ jobs:
       # Import solution into target environment
       - name: Import Solution into Target Environment
         run: |
-          if [ -f "./automations.zip" ]; then
+          if [ -f "./automations_1_0_0_4.zip" ]; then
             echo "Starting solution import..."
             pac solution import \
-              --path automations.zip \
+              --path automations_1_0_0_4.zip \
               --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7 \
               --overwrite-unmanaged-customizations true \
               --log import.log || { echo "Solution import failed. Check logs for details."; exit 1; }
           else
-            echo "Error: automations.zip not found!"
+            echo "Error: automations_1_0_0_4.zip not found!"
             exit 1
           fi
 
