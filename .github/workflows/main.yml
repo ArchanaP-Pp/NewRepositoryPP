@@ -1,7 +1,7 @@
 name: Power Automate CI/CD Pipeline
 
 on:
-  push:
+  push: 
     branches:
       - main
   pull_request:
