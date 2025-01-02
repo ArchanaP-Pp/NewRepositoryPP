@@ -25,7 +25,9 @@ jobs:
 
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
-        run: npm install -g pac-cli
+        run: |
+          npm install -g pac-cli
+          pac --version  # Verify pac-cli installation and version
 
       # Authenticate with Power Platform (Source Environment)
       - name: Authenticate with Power Platform (Source Environment)
@@ -86,7 +88,9 @@ jobs:
 
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
-        run: npm install -g pac-cli
+        run: |
+          npm install -g pac-cli
+          pac --version  # Verify pac-cli installation and version
 
       # Authenticate with Power Platform (Target Environment)
       - name: Authenticate with Power Platform (Target Environment)
@@ -97,7 +101,7 @@ jobs:
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
-           # Retry import solution
+      # Retry import solution
       - name: Retry Import Solution
         run: |
           for i in {1..3}; do
@@ -127,18 +131,6 @@ jobs:
             exit 1
           fi
 
-
-      # Check if import.log exists and output content
-      - name: Display Import Logs
-        run: |
-          if [ -f "import.log" ]; then
-            echo "Import logs:"
-            cat import.log
-          else
-            echo "No import.log found"
-            exit 1
-          fi
-
       # Verify import status
       - name: Verify Import Status
         run: |
@@ -147,4 +139,4 @@ jobs:
 
       # Notify success
       - name: Notify success
-        run: echo "Solution has been successfully deployed to the target environment."
+        run: echo "Solution has been successfully deployed to the target environment." 
