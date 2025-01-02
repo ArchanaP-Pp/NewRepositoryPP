@@ -23,94 +23,149 @@ jobs:
         with:
           node-version: '14'
 
-     # Install Power Platform CLI (pac)
-echo "Installing Power Platform CLI..."
-npm install -g pac-cli@latest
-pac --version  # Verify pac-cli installation and version
+      # Install Power Platform CLI (pac)
+      - name: Install Power Platform CLI
+        run: |
+          echo "Installing Power Platform CLI..."
+          npm install -g pac-cli@latest
+          pac --version  # Verify pac-cli installation and version
 
-# Ensure the 'solution' command exists in pac CLI
-echo "Checking for solution command in pac CLI..."
-if ! pac --help | grep -q 'solution'; then
-  echo "pac solution command is missing. Exiting."
-  exit 1
-fi
+      # Ensure the 'solution' command exists in pac CLI
+      - name: Check if solution command exists in pac CLI
+        run: |
+          echo "Checking for solution command in pac CLI..."
+          if ! pac --help | grep -q 'solution'; then
+            echo "pac solution command is missing. Exiting."
+            exit 1
+          fi
 
-# Authenticate with Power Platform (Source Environment)
-echo "Authenticating with Power Platform (Source Environment)..."
-pac auth create \
-  --url https://make.powerautomate.com/environments/10615798-70d6-efb4-a25a-7c36b627d7d7 \
-  --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
-  --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
-  --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
+      # Authenticate with Power Platform (Source Environment)
+      - name: Authenticate with Power Platform (Source Environment)
+        run: |
+          echo "Authenticating with Power Platform (Source Environment)..."
+          pac auth create \
+            --url https://make.powerautomate.com/environments/10615798-70d6-efb4-a25a-7c36b627d7d7 \
+            --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
+            --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
+            --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
 
-# Export solution from source environment
-echo "Exporting solution from source environment..."
-pac solution export \
-  --environment 10615798-70d6-efb4-a25a-7c36b627d7d7 \
-  --path "PAutomationGitTesting_1_0_0_3.zip" \
-  --managed true
+      # Export solution from source environment
+      - name: Export solution from source environment
+        run: |
+          echo "Exporting solution from source environment..."
+          pac solution export \
+            --environment 10615798-70d6-efb4-a25a-7c36b627d7d7 \
+            --path "PAutomationGitTesting_1_0_0_3.zip" \
+            --managed true
 
-# Validate exported solution
-echo "Validating exported solution..."
-if [ ! -f "./PAutomationGitTesting_1_0_0_3.zip" ]; then
-  echo "Error: PAutomationGitTesting_1_0_0_3.zip not found!"
-  exit 1
-fi
-if [ ! -s "./PAutomationGitTesting_1_0_0_3.zip" ]; then
-  echo "Error: PAutomationGitTesting_1_0_0_3.zip is empty!"
-  exit 1
-fi
+      # Validate exported solution
+      - name: Validate exported solution
+        run: |
+          echo "Validating exported solution..."
+          if [ ! -f "./PAutomationGitTesting_1_0_0_3.zip" ]; then
+            echo "Error: PAutomationGitTesting_1_0_0_3.zip not found!"
+            exit 1
+          fi
+          if [ ! -s "./PAutomationGitTesting_1_0_0_3.zip" ]; then
+            echo "Error: PAutomationGitTesting_1_0_0_3.zip is empty!"
+            exit 1
+          fi
 
-# Configure Git user details
-echo "Configuring Git user..."
-git config --global user.name "GitHub Actions"
-git config --global user.email "actions@github.com"
+      # Configure Git user details
+      - name: Configure Git user
+        run: |
+          echo "Configuring Git user..."
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
-# Commit and push solution
-echo "Committing and pushing solution..."
-git add "PAutomationGitTesting_1_0_0_3.zip"
-git commit -m "Exported solution from source environment" || echo "Nothing to commit."
-git push || echo "Push failed. Check permissions or authentication."
+      # Commit and push solution
+      - name: Commit and push solution
+        run: |
+          echo "Committing and pushing solution..."
+          git add "PAutomationGitTesting_1_0_0_3.zip"
+          git commit -m "Exported solution from source environment" || echo "Nothing to commit."
+          git push || echo "Push failed. Check permissions or authentication."
 
-# Authenticate with Power Platform (Target Environment)
-echo "Authenticating with Power Platform (Target Environment)..."
-pac auth create \
-  --url https://make.powerautomate.com/environments/8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
-  --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
-  --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
-  --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
 
-# Retry solution import with logging
-echo "Starting solution import with retry logic..."
-for i in {1..3}; do
-  if [ -f "./PAutomationGitTesting_1_0_0_3.zip" ]; then
-    echo "Attempting to import solution..."
-    pac solution import \
-      --path "PAutomationGitTesting_1_0_0_3.zip" \
-      --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
-      --overwrite-unmanaged-customizations true \
-      --log "import.log" \
-      --verbose > pac_import_output.log 2>&1 && break || sleep 10
-  else
-    echo "Error: PAutomationGitTesting_1_0_0_3.zip not found!"
-    exit 1
-  fi
-done
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-# Check if import.log exists and output content
-echo "Checking import logs..."
-if [ -f "import.log" ]; then
-  echo "Import logs:"
-  cat import.log
-else
-  echo "No import.log found. Checking pac_import_output.log for errors:"
-  cat pac_import_output.log
-  exit 1
-fi
+      # Set up Node.js
+      - name: Set up Node.js 14
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
 
-# Verify import status
-echo "Verifying solution import status..."
-pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7
+      # Install Power Platform CLI (pac)
+      - name: Install Power Platform CLI
+        run: |
+          echo "Installing Power Platform CLI..."
+          npm install -g pac-cli@latest
+          pac --version  # Verify pac-cli installation and version
 
-# Notify success
-echo "Solution has been successfully deployed to the target environment."
+      # Ensure the 'solution' command exists in pac CLI
+      - name: Check if solution command exists in pac CLI
+        run: |
+          echo "Checking for solution command in pac CLI..."
+          if ! pac --help | grep -q 'solution'; then
+            echo "pac solution command is missing. Exiting."
+            exit 1
+          fi
+
+      # Authenticate with Power Platform (Target Environment)
+      - name: Authenticate with Power Platform (Target Environment)
+        run: |
+          echo "Authenticating with Power Platform (Target Environment)..."
+          pac auth create \
+            --url https://make.powerautomate.com/environments/8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
+            --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
+            --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
+            --clientSecret "${{ secrets.POWER_AUTOMATE_CLIENT_SECRET }}"
+
+      # Retry solution import with logging
+      - name: Retry solution import with logging
+        run: |
+          echo "Starting solution import with retry logic..."
+          for i in {1..3}; do
+            if [ -f "./PAutomationGitTesting_1_0_0_3.zip" ]; then
+              echo "Attempting to import solution..."
+              pac solution import \
+                --path "PAutomationGitTesting_1_0_0_3.zip" \
+                --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
+                --overwrite-unmanaged-customizations true \
+                --log "import.log" \
+                --verbose > pac_import_output.log 2>&1 && break || sleep 10
+            else
+              echo "Error: PAutomationGitTesting_1_0_0_3.zip not found!"
+              exit 1
+            fi
+          done
+
+      # Check if import.log exists and output content
+      - name: Check and display import logs
+        run: |
+          echo "Checking import logs..."
+          if [ -f "import.log" ]; then
+            echo "Import logs:"
+            cat import.log
+          else
+            echo "No import.log found. Checking pac_import_output.log for errors:"
+            cat pac_import_output.log
+            exit 1
+          fi
+
+      # Verify import status
+      - name: Verify import status
+        run: |
+          echo "Verifying solution import status..."
+          pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7
+
+      # Notify success
+      - name: Notify success
+        run: |
+          echo "Solution has been successfully deployed to the target environment."
