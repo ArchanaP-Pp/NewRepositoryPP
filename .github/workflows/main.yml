@@ -92,7 +92,7 @@ jobs:
       - name: Authenticate with Power Platform (Target Environment)
         run: |
           pac auth create \
-            --url https://make.powerautomate.com/environments/8c75c40e-a5b3-e306-a0e5-9116c62957d7d7 \
+            --url https://make.powerautomate.com/environments/8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
             --tenant 0804b8f6-e628-4fa1-9eae-181b1d6205a5 \
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
@@ -104,7 +104,7 @@ jobs:
             echo "Starting solution import..."
             pac solution import \
               --path "PAutomationGitTesting_1_0_0_1_managed.zip" \
-              --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7 \
+              --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
               --overwrite-unmanaged-customizations true \
               --log import.log || { echo "Solution import failed. Check logs for details."; exit 1; }
           else
@@ -116,8 +116,8 @@ jobs:
       - name: Verify Import Status
         run: |
           echo "Verifying solution import..."
-          pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7
+          pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7
 
       # Notify success
       - name: Notify success
-        run: echo "Solution has been successfully deployed to the target environment."
+        run: echo "Solution has been successfully deployed to the target environment." 
