@@ -1,7 +1,7 @@
 name: Power Automate CI/CD Pipeline
 
 on:
-  push: 
+  push:
     branches:
       - main
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
         run: |
-          npm install -g pac-cli
+          npm install -g pac-cli@latest
           pac --version  # Verify pac-cli installation and version
           pac --help     # Check if the solution command is available
 
@@ -90,7 +90,7 @@ jobs:
       # Install Power Platform CLI (pac)
       - name: Install Power Platform CLI (pac)
         run: |
-          npm install -g pac-cli
+          npm install -g pac-cli@latest
           pac --version  # Verify pac-cli installation and version
           pac --help     # Check if the solution command is available
 
