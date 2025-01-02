@@ -28,6 +28,7 @@ jobs:
         run: |
           npm install -g pac-cli
           pac --version  # Verify pac-cli installation and version
+          pac --help     # Check if the solution command is available
 
       # Authenticate with Power Platform (Source Environment)
       - name: Authenticate with Power Platform (Source Environment)
@@ -91,6 +92,7 @@ jobs:
         run: |
           npm install -g pac-cli
           pac --version  # Verify pac-cli installation and version
+          pac --help     # Check if the solution command is available
 
       # Authenticate with Power Platform (Target Environment)
       - name: Authenticate with Power Platform (Target Environment)
@@ -101,7 +103,7 @@ jobs:
             --applicationId cf7ea4d3-743b-4b47-9575-a01d49169be6 \
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
-      # Retry import solution
+      # Retry solution import with logging
       - name: Retry Import Solution
         run: |
           for i in {1..3}; do
@@ -139,4 +141,4 @@ jobs:
 
       # Notify success
       - name: Notify success
-        run: echo "Solution has been successfully deployed to the target environment." 
+        run: echo "Solution has been successfully deployed to the target environment."
