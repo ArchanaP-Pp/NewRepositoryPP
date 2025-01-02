@@ -107,24 +107,29 @@ jobs:
                 --path "PAutomationGitTesting_1_0_0_3.zip" \
                 --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7 \
                 --overwrite-unmanaged-customizations true \
-                --log import.log && break || sleep 10
+                --log "import.log" && break || sleep 10
             else
               echo "Error: PAutomationGitTesting_1_0_0_3.zip not found!"
               exit 1
             fi
           done
 
+      # Check if import.log exists and output content
+      - name: Display Import Logs
+        run: |
+          if [ -f "import.log" ]; then
+            echo "Import logs:"
+            cat import.log
+          else
+            echo "No import.log found"
+            exit 1
+          fi
+
       # Verify import status
       - name: Verify Import Status
         run: |
           echo "Verifying solution import..."
           pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7
-          
-      # Show Import Logs
-      - name: Show Import Logs
-        run: |
-          echo "Import logs:"
-          cat import.log
 
       # Notify success
       - name: Notify success
