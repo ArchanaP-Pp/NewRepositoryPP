@@ -37,12 +37,24 @@ jobs:
             --clientSecret "FBI8Q~h03tyVq77yob_zpK4Mn0M-iGK5gKYW-cCl"
 
       # Export solution from source environment
-      - name: Export solution from Source Environment
+      - name: Export solution from source environment
         run: |
           pac solution export \
             --environment 10615798-70d6-efb4-a25a-7c36b627d7d7 \
             --path automations.zip \
             --managed true
+
+      # Validate exported solution
+      - name: Validate exported solution
+        run: |
+          if [ ! -f "./automations.zip" ]; then
+            echo "Error: automations.zip not found!"
+            exit 1
+          fi
+          if [ ! -s "./automations.zip" ]; then
+            echo "Error: automations.zip is empty!"
+            exit 1
+          fi
 
       # Configure Git user details
       - name: Configure Git user
@@ -50,22 +62,12 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      # Check if the file exists and commit it
+      # Commit and push solution
       - name: Commit and push solution
-        shell: bash
         run: |
-          if [ -f "./automations.zip" ]; then
-            git add automations.zip
-            git status
-            if git commit -m "Exported solution from source environment"; then
-              git push
-            else
-              echo "No changes to commit, working tree clean."
-            fi
-          else
-            echo "File not found: ./automations.zip"
-            exit 1
-          fi
+          git add automations.zip
+          git commit -m "Exported solution from source environment" || echo "Nothing to commit."
+          git push || echo "Push failed. Check permissions or authentication."
 
   deploy:
     runs-on: ubuntu-latest
@@ -98,10 +100,23 @@ jobs:
       # Import solution into target environment
       - name: Import Solution into Target Environment
         run: |
-          pac solution import \
-            --path automations.zip \
-            --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7 \
-            --overwrite-unmanaged-customizations true
+          if [ -f "./automations.zip" ]; then
+            echo "Starting solution import..."
+            pac solution import \
+              --path automations.zip \
+              --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7 \
+              --overwrite-unmanaged-customizations true \
+              --log import.log || { echo "Solution import failed. Check logs for details."; exit 1; }
+          else
+            echo "Error: automations.zip not found!"
+            exit 1
+          fi
+
+      # Verify import status
+      - name: Verify Import Status
+        run: |
+          echo "Verifying solution import..."
+          pac solution list --environment 8c75c40e-a5b3-e306-a0e5-9116c62957d7d7
 
       # Notify success
       - name: Notify success
